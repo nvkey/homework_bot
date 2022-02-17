@@ -7,7 +7,7 @@ from logging.handlers import RotatingFileHandler
 import requests
 import telegram
 from dotenv import load_dotenv
-# from requests.exceptions import HTTPError
+
 
 load_dotenv()
 
@@ -59,7 +59,6 @@ def send_message(bot, message):
         logger.info(f"Сообщение отправлено: {message}")
     except Exception as error:
         logger.exception(f"Сбой отправки, ошибка: {error}")
-        raise error
 
 
 def get_api_answer(current_timestamp):
@@ -71,20 +70,17 @@ def get_api_answer(current_timestamp):
             ENDPOINT,
             headers=HEADERS,
             params=params)
-        status = homework_statuses.status_code
-        if status != HTTPStatus.OK:
-            logger.exception(f"HTTP ошибка: {status}")
-            raise Exception
-        # homework_statuses.raise_for_status() тест не работает с этим методом
-    # except HTTPError as http_error:
-        # logger.exception(f"HTTP ошибка: {http_error}")
-        # raise http_error
     except Exception as error:
         logger.exception(f"Ошибка: {error}")
         raise error
+    status = homework_statuses.status_code
+    if status != HTTPStatus.OK:
+        logger.exception(f"HTTP ошибка: {status}")
+        raise Exception
     logger.info(f"Выполнен запрос к эндпоинту {timestamp}")
     logger.debug(f"Ответ по эндпоинту {homework_statuses.json()}")
     if homework_statuses is None:
+        logger.error(f"Не верный пакет: {homework_statuses}")
         raise Exception
     return homework_statuses.json()
 
